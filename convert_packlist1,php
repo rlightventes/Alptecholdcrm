@@ -1,0 +1,41 @@
+<?php
+//inckude autoloader
+include_once '../common.php';
+require_once 'dompdf/autoload.inc.php';
+
+// 	$id = $_GET['id'];
+	$mysqli->where('pack_no', $_GET['pack']);
+	$getComm = $mysqli->getOne(AL_PRICE);
+	extract($getComm);
+	$c_id = base64_encode($client_id);
+
+	$data = array('pdf' => '1');
+	$mysqli->where('id', $id);
+	$update = $mysqli->update(AL_PRICE, $data);
+						
+ /*$qtID = str_replace('/', '-', $id); base64_encode();*/
+
+// reference the Dompdf namespace
+use Dompdf\Dompdf;
+
+//Instantiate dompdf class
+$dompdf = new Dompdf();
+
+//load HTML content
+/*$dompdf->loadHtml('<img src="images/logo.png">');*/
+
+//load content from HTML file
+$html = file_get_contents("https://alptechindia.com/erp-alptech/create_packlist.php?pack=".$_GET['pack']);
+$dompdf->loadHtml($html);
+
+$dompdf->setPaper('A4', 'portal');
+$dompdf->render();
+$output = $dompdf->output();
+//file location where we need to store pdf
+file_put_contents('pdf/PACKNO-'.$_GET['pack'].'.pdf', $output);
+//Output thegenerated PDF
+/*header("location:index.php");*/
+$dompdf->stream($id, array('Attachment'=> 0));
+// header('location:commission_list.php?client='.$c_id);
+
+?>
